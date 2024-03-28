@@ -156,7 +156,7 @@ function manageMenuExp() {
 	echo "   8) Exit"
 	# until [[ -z $MENU_OPTION || $MENU_OPTION =~ ^[1-8]$ ]]; do
 	until [[ $MENU_OPTION =~ ^[1-8]$ ]]; do
-		read -rp "Select an option [1-7]: " MENU_OPTION
+		read -rp "Select an option [1-8]: " MENU_OPTION
 	done
 
 	case $MENU_OPTION in
