@@ -1793,7 +1793,7 @@ if [[ $cron_conf2 -eq 1 ]]; then
 	read -p "Crontab for WG repair already configured. Reconfigure? [y/N]: " recon
 
 	if [ -z $recon ]
-		then exit
+		then return
 	fi
 
 	until [[ "$recon" =~ ^[yYnN]*$ ]]; do
@@ -1802,15 +1802,14 @@ if [[ $cron_conf2 -eq 1 ]]; then
 	done
 	
 	if [[ "$recon" =~ ^[nN]$ ]]; then
-		exit
+		return
 	else
 		cron='Y'
 	fi
 else
 	read -p "Configure Crontab for WG repair? [Y/n]: " cron
-	if [ -z $cron ]
-	then
-		 cron='Y'
+	if [[ -z $cron ]]; then
+		cron='Y'
 	fi
 
 	until [[ "$cron" =~ ^[yYnN]*$ ]]; do
@@ -1820,72 +1819,14 @@ else
 fi
 
 if [[ $cron_conf -eq 1 ]]; then
-	#crontab -l > mycron
 	grep -v $exe_str /var/spool/cron/crontabs/root | grep -v '^#' | grep -v '^$' > mycron
 fi
 
 if [[ "$cron" =~ ^[yY]$ ]]; then
 	checkPrepare
 	
-	while :; do
-		read -p "Enter a trigger frequency in hours (1-12) [4]: " h_freq
-		[[ -z "$h_freq" || $h_freq =~ ^[0-9]+$ ]] || { echo "Enter a valid number"; continue; }
-		
-		if [ -z $h_freq ]; then
-			h_freq=4
-			break
-		fi
-		
-		if ((h_freq >= 1 && h_freq <= 12)); then
-			break
-		else
-			echo "number out of range, try again"
-		fi
-	done
-	
-	while :; do
-		if [[ h_freq -eq 1 ]]; then
-			read -p "Start at every some minute? [Y/n]: " every_some_min
-			if [[ -z $every_some_min ]]; then
-				every_some_min="Y"
-			fi
-			
-			if [[ "$every_some_min" =~ ^[yY]$ ]]; then
-				read -p "What frequency in minutes you want? (0-30) [15]: " m_start_every
-				[[ -z "$m_start_every" || $m_start =~ ^[0-9]+$ ]] || { echo "Enter a valid number"; continue; }
-				
-				if [[ -z $m_start_every ]]; then
-					m_start_every=15
-				fi
-				min_part="*/$(m_start_every)"
-				break
-			fi
-		else
-			read -p "At what minute should the task start? (0-30) [15]: " m_start
-			[[ -z "$m_start" || $m_start =~ ^[0-9]+$ ]] || { echo "Enter a valid number"; continue; }
-				
-			if [ -z $m_start ]; then
-				m_start=15
-				min_part=$m_start
-				break
-			fi
-			
-			if ((m_start >= 0 && m_start <= 30)); then
-				min_part=$m_start
-				break
-			else
-				echo "number out of range, try again"
-			fi
-		fi
-	done
-	
-	if [[ h_freq -eq 1 ]]; then
-		hour_part="* * * *"
-	else
-		hour_part="*/${h_freq} * * *"
-	fi
-		
-	echo "${min_part} ${hour_part} ${exe_str}" >> mycron
+	echo "@reboot  ${exe_str}" >> mycron
+	echo "@hourly  ${exe_str}" >> mycron
 	crontab mycron
 	rm mycron 
 	
@@ -1895,6 +1836,7 @@ fi
 }
 
 function checkCrontab() {
+local exe_str="/root/wg_repair/wg_repair.sh"
 if [ -f /var/spool/cron/crontabs/root ]; then
 	cron_conf=1
 	cron_line=$(grep $exe_str /var/spool/cron/crontabs/root)
