@@ -150,11 +150,12 @@ function manageMenuExp() {
 	echo "   2) Create WG config"
 	echo "   3) Create User config"
 	echo "   4) Show User config"
-	echo "   5) Firewall config"
-	echo "   6) Clone WG interface with users from existing WG interface (*expert function)"
-	echo "   7) Exit"
-	# until [[ -z $MENU_OPTION || $MENU_OPTION =~ ^[1-7]$ ]]; do
-	until [[ $MENU_OPTION =~ ^[1-7]$ ]]; do
+	echo "   5) Create crontab job for repair WG"
+	echo "   6) Firewall config"
+	echo "   7) Clone WG interface with users from existing WG interface (*expert function)"
+	echo "   8) Exit"
+	# until [[ -z $MENU_OPTION || $MENU_OPTION =~ ^[1-8]$ ]]; do
+	until [[ $MENU_OPTION =~ ^[1-8]$ ]]; do
 		read -rp "Select an option [1-7]: " MENU_OPTION
 	done
 
@@ -182,11 +183,16 @@ function manageMenuExp() {
 		manageMenuExp
 		;;
 	5)
+		configCrontab2
+		MENU_OPTION=0
+		manageMenuExp
+		;;		
+	6)
 		iptablesSettings
 		MENU_OPTION=0
 		manageMenuExp		
 		;;
-	6)
+	7)
 		echo 
 		echo "This option for cloning non obfuscate WG int"
 		echo "to new WG int with obfuscate"
@@ -196,7 +202,7 @@ function manageMenuExp() {
 		MENU_OPTION=0
 		manageMenuExp			
 		;;
-	7|"")
+	8|"")
 		exit 0
 		;;
 	esac
@@ -1839,18 +1845,20 @@ if [[ "$cron" =~ ^[yY]$ ]]; then
 	
 	while :; do
 		if [[ h_freq -eq 1 ]]; then
-			read -p "Start at avery some minute? [Y/n]: " every_some_min
-			
+			read -p "Start at every some minute? [Y/n]: " every_some_min
 			if [[ -z $every_some_min ]]; then
 				every_some_min="Y"
 			fi
 			
 			if [[ "$every_some_min" =~ ^[yY]$ ]]; then
-				read -p "What frequency in minutes you want? (0-30) [15]: " m_start_every			
-				if [ -z $m_start ]; then
+				read -p "What frequency in minutes you want? (0-30) [15]: " m_start_every
+				[[ -z "$m_start_every" || $m_start =~ ^[0-9]+$ ]] || { echo "Enter a valid number"; continue; }
+				
+				if [[ -z $m_start_every ]]; then
 					m_start_every=15
 				fi
 				min_part="*/$(m_start_every)"
+				break
 			fi
 		else
 			read -p "At what minute should the task start? (0-30) [15]: " m_start
@@ -1905,7 +1913,7 @@ if [ ! -d ~/wg_repair ]; then
 fi
 
 if [ ! -f wg_repair.sh ]; then
-	wget https://github.com/Paulus13/se_install/raw/main/dhcp_check.zip
+	wget https://github.com/Paulus13/wireguard-swgp/raw/main/wg_repair.sh
 fi
 
 mv wg_repair.sh ~/wg_repair
