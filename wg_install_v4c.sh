@@ -1854,12 +1854,15 @@ if [ ! -d ~/wg_repair ]; then
 	mkdir ~/wg_repair
 fi
 
-if [ ! -f wg_repair.sh ]; then
-	wget https://github.com/Paulus13/wireguard-swgp/raw/main/wg_repair.sh
+if [[ ! -f ~/wg_repair/wg_repair.sh ]]; then
+	if [[ ! -f wg_repair.sh ]]; then
+		wget https://github.com/Paulus13/wireguard-swgp/raw/main/wg_repair.sh
+	fi
+	mv wg_repair.sh ~/wg_repair
+	chmod +x ~/wg_repair/wg_repair.sh
+else
+	chmod +x ~/wg_repair/wg_repair.sh
 fi
-
-mv wg_repair.sh ~/wg_repair
-chmod +x ~/wg_repair/wg_repair.sh
 }
 
 orig_path=$(pwd)
