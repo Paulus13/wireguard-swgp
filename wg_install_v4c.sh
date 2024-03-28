@@ -679,6 +679,15 @@ else
 	wg_int_name=$t_sel_wg
 fi
 
+wg_conf_ep_line=$(grep Endpoint /etc/wireguard/${wg_int_name}.conf)
+if [[ ! -z $wg_conf_ep_line ]]; then
+	echo
+	echo -e "${red}$(wg_int_name) - this interface not for external connections${plain}"
+	echo -e "${red}Select another${plain}"
+	echo
+	return
+fi
+	
 def_client_name="wg_user"
 wg_int_num=$(echo $wg_int_name | sed 's/wg//g')
 
