@@ -1860,7 +1860,6 @@ fi
 
 mv wg_repair.sh ~/wg_repair
 chmod +x ~/wg_repair/wg_repair.sh
-fi
 }
 
 orig_path=$(pwd)
