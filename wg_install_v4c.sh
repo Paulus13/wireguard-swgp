@@ -682,9 +682,8 @@ fi
 wg_conf_ep_line=$(grep Endpoint /etc/wireguard/${wg_int_name}.conf)
 if [[ ! -z $wg_conf_ep_line ]]; then
 	echo
-	echo -e "${red}$(wg_int_name) - this interface not for external connections${plain}"
+	echo -e "${red}${wg_int_name} - this interface not for external connections${plain}"
 	echo -e "${red}Select another${plain}"
-	echo
 	return
 fi
 	
