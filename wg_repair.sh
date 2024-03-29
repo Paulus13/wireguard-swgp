@@ -16,13 +16,12 @@ if grep -qs "ubuntu" /etc/os-release; then
 	os="ubuntu"
 	os_version=$(grep 'VERSION_ID' /etc/os-release | cut -d '"' -f 2 | tr -d '.')
 else
-	# echo "This script for Ubuntu 18.04 or higher. For other OS use original script"
+	write_log "Bad OS (not Ubuntu)"
 	exit
 fi
 
 if [[ "$os" == "ubuntu" && "$os_version" -lt 1804 ]]; then
-	# echo "Ubuntu 18.04 or higher is required to use this installer."
-	# echo "This version of Ubuntu is too old and unsupported."
+	write_log "Bad OS (old version Ubuntu)"
 	exit
 fi
 
@@ -34,12 +33,6 @@ fi
 }
 
 function repairWGOBFUS {
-# checkWGOBFUS
-# if [[ $wg_obfus_inst -eq 1 ]]; then
-	# write_log "repair not needed"
-	# return
-# fi
-
 if [[ $old_kern -eq 1 ]]; then
 	dkms build -m wireguard -v 1.0.20240129
 	dkms install -m wireguard -v 1.0.20240129
