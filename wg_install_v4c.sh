@@ -1393,7 +1393,19 @@ else
 	client_conf_path="/etc/wireguard/clients${wg_int_num}"
 fi
 
+if [[ ! -d $client_conf_path ]]; then
+	echo
+	echo -e "${red}No users for this interface${plain}"
+	return
+fi
+
 num_conf=$(ls $client_conf_path | wc -l)
+
+if [[ $num_conf -eq 0 ]]; then
+	echo
+	echo -e "${red}No users for this interface${plain}"
+	return
+fi
 
 if [[ $num_conf -eq 1 ]]; then
 	tUser=$(ls $client_conf_path)

@@ -159,6 +159,15 @@ else
 fi
 }
 
+function checkUptime {
+up_main_val=$(uptime -p | awk '{print $2}')
+up_main_unit=$(uptime -p | awk '{print $3}')
 
+if [[ $up_main_val == "0" && $up_main_unit == "minutes" ]]; then
+	sleep 30
+fi
+}
+
+checkUptime
 initialCheck
 checkWGDkms
