@@ -70,15 +70,12 @@ fi
 
 write_log() {
 t_str=$1
-t_str_up=$(echo $t_str | grep -i "repair not needed")
 
 my_date=$(date '+%d %b %Y %H:%M:%S')
-# t_day=$(date '+%d')
 t_out_str="${my_date}  ${t_str}"
 
 if [[ ! -f $log_file ]]; then
 	echo $t_out_str > $log_file
-	return
 else
 	echo $t_out_str >> $log_file
 fi
