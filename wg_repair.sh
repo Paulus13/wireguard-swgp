@@ -8,7 +8,7 @@ mkdir -p $log_path
 
 function initialCheck() {
 if [ "$EUID" -ne 0 ]; then 
-  write_log "running under non root user"
+  write_log2 "running under non root user"
   exit
 fi
 
@@ -16,12 +16,12 @@ if grep -qs "ubuntu" /etc/os-release; then
 	os="ubuntu"
 	os_version=$(grep 'VERSION_ID' /etc/os-release | cut -d '"' -f 2 | tr -d '.')
 else
-	write_log "Bad OS (not Ubuntu)"
+	write_log2 "Bad OS (not Ubuntu)"
 	exit
 fi
 
 if [[ "$os" == "ubuntu" && "$os_version" -lt 1804 ]]; then
-	write_log "Bad OS (old version Ubuntu)"
+	write_log2 "Bad OS (old version Ubuntu)"
 	exit
 fi
 
@@ -86,7 +86,7 @@ fi
 
 function checkWGDkms {
 if [[ ! -f /usr/sbin/dkms ]]; then
-	write_log  "dkms not installed"
+	write_log2  "dkms not installed"
 	return
 fi
 t_kern=$(uname -a | awk '{print $3}')
@@ -97,7 +97,7 @@ if [[ ! -z $t_dkms && -z $t_dkms_kern ]]; then
 	wg_obfus_inst=1
 	wg_obfus_load=0
 	
-	write_log "repair needed, try to repair"
+	write_log2 "repair needed, try to repair"
 	repairWGOBFUS
 	
 	t_dkms=$(dkms status | grep wireguard)
@@ -105,16 +105,16 @@ if [[ ! -z $t_dkms && -z $t_dkms_kern ]]; then
 	wg_module_obfus=$(dmesg | grep wireguard | grep obfuscate)
 	
 	if [[ ! -z $t_dkms && ! -z $t_dkms_kern && ! -z $wg_module_obfus ]]; then
-		write_log  "repaired successfully"
+		write_log2  "repaired successfully"
 	else
-		write_log  "repair not successfull$"
+		write_log2  "repair not successfull$"
 	fi
 else
-	write_log "repair not needed"
+	write_log2 "repair not needed"
 fi
 }
 
-write_log() {
+function write_log() {
 t_str=$1
 t_str_up=$(echo $t_str | grep -i "repair not needed")
 
@@ -152,12 +152,29 @@ else
 fi
 }
 
+function write_log2 {
+t_str=$1
+
+my_date=$(date '+%d %b %Y %H:%M:%S')
+t_out_str="${my_date}  ${t_str}"
+
+if [[ ! -f $log_file ]]; then
+	echo $t_out_str > $log_file
+else
+	echo $t_out_str >> $log_file
+fi
+}
+
+function compactLog {
+my_date=$(date '+%d %b %Y')
+}
+
 function checkUptime {
 up_main_val=$(uptime -p | awk '{print $2}')
 up_main_unit=$(uptime -p | awk '{print $3}')
 
 if [[ $up_main_val == "0" && $up_main_unit == "minutes" ]]; then
-	write_log "reboot detected, wait 30 sec"
+	write_log2 "reboot detected, pause 30 sec"
 	sleep 30
 fi
 }
