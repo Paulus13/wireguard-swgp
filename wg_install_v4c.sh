@@ -253,7 +253,6 @@ function manageMenuSimple() {
 	esac
 }
 
-
 function selectWGInt {
 wg_conf_num=$(ls /etc/wireguard/wg*.conf 2>/dev/null | wc -l)
 if [[ $wg_conf_num -eq 0 ]]; then
@@ -1810,21 +1809,12 @@ local exe_str="/root/wg_repair/wg_repair.sh"
 checkCrontab
 
 if [[ $cron_conf2 -eq 1 ]]; then
-	read -p "Crontab for WG repair already configured. Reconfigure? [y/N]: " recon
-
-	if [ -z $recon ]
-		then return
-	fi
-
-	until [[ "$recon" =~ ^[yYnN]*$ ]]; do
-		echo "$recon: invalid selection."
-		read -p "Reconfigure Crontab? [y/n]: " recon
-	done
-	
-	if [[ "$recon" =~ ^[nN]$ ]]; then
+	cronMenu
+	if [[ $delete_cron -eq 1 ]]; then
+		delCron
 		return
-	else
-		cron='Y'
+	elif [[ $reconfig_cron -eq 0 ]]; then
+		return
 	fi
 else
 	read -p "Configure Crontab for WG repair? [Y/n]: " cron
@@ -1853,6 +1843,19 @@ if [[ "$cron" =~ ^[yY]$ ]]; then
 	echo "Crontab configured"
 	#crontab -l
 fi
+}
+
+function delCron {
+local exe_str="/root/wg_repair/wg_repair.sh"
+
+grep -v $exe_str /var/spool/cron/crontabs/root | grep -v '^#' | grep -v '^$' > mycron
+cron_line_num=$(cat mycron | wc -l)
+if [[ $cron_line_num -eq 0 ]]; then
+	crontab -r
+else
+	crontab mycron
+fi
+rm mycron
 }
 
 function checkCrontab() {
@@ -1884,6 +1887,37 @@ else
 	chmod +x ~/wg_repair/wg_repair.sh
 fi
 }
+
+function cronMenu() {
+	MENU_OPTION="menu"
+	# echo
+	# echo "Crontab menu"
+	echo 
+	echo "What do you want to do?"
+	echo "   1) Reconfigure crontab for WG repair"
+	echo "   2) Delete crontab configuration for WG repair"
+	echo "   3) Do Nothing"
+	# until [[ -z $MENU_OPTION || $MENU_OPTION =~ ^[1-3]$ ]]; do
+	until [[ $MENU_OPTION =~ ^[1-3]$ ]]; do
+		read -rp "Select an option [1-3]: " MENU_OPTION
+	done
+
+	case $MENU_OPTION in
+	1)
+		reconfig_cron=1
+		delete_cron=0
+		;;
+	2)
+		reconfig_cron=1
+		delete_cron=1
+		;;
+	3)
+		reconfig_cron=0
+		delete_cron=0
+		;;		
+	esac
+}
+
 
 orig_path=$(pwd)
 initialCheck
