@@ -166,7 +166,11 @@ fi
 }
 
 function compactLog {
-my_date=$(date '+%d %b %Y')
+log_lines_num=$(cat $log_file | wc -l)
+if [[ $log_lines_num -gt 200 ]]; then
+	grep -v "repair not needed" $log_file > $log_file_tmp
+	mv $log_file_tmp $log_file
+fi
 }
 
 function checkUptime {
@@ -182,3 +186,4 @@ fi
 checkUptime
 initialCheck
 checkWGDkms
+compactLog
