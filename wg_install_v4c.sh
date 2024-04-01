@@ -1862,7 +1862,7 @@ function checkCrontab() {
 local exe_str="/root/wg_repair/wg_repair_launcher.sh"
 if [ -f /var/spool/cron/crontabs/root ]; then
 	cron_conf=1
-	cron_line=$(grep $exe_str /var/spool/cron/crontabs/root)
+	cron_line=$(grep "$exe_str" /var/spool/cron/crontabs/root)
 	if [[ ! -z $cron_line ]]
 		then cron_conf2=1
 	fi
