@@ -1805,7 +1805,7 @@ checkWGDkms 1
 }
 
 function configCrontab2() {
-local exe_str="/root/wg_repair/wg_repair.sh"
+local exe_str="/root/wg_repair/wg_repair_launcher.sh"
 checkCrontab
 
 if [[ $cron_conf2 -eq 1 ]]; then
@@ -1846,7 +1846,7 @@ fi
 }
 
 function delCron {
-local exe_str="/root/wg_repair/wg_repair.sh"
+local exe_str="/root/wg_repair/wg_repair_launcher.sh"
 
 grep -v $exe_str /var/spool/cron/crontabs/root | grep -v '^#' | grep -v '^$' > mycron
 cron_line_num=$(cat mycron | wc -l)
@@ -1859,7 +1859,7 @@ rm mycron
 }
 
 function checkCrontab() {
-local exe_str="/root/wg_repair/wg_repair.sh"
+local exe_str="/root/wg_repair/wg_repair_launcher.sh"
 if [ -f /var/spool/cron/crontabs/root ]; then
 	cron_conf=1
 	cron_line=$(grep $exe_str /var/spool/cron/crontabs/root)
@@ -1885,6 +1885,16 @@ if [[ ! -f ~/wg_repair/wg_repair.sh ]]; then
 	chmod +x ~/wg_repair/wg_repair.sh
 else
 	chmod +x ~/wg_repair/wg_repair.sh
+fi
+
+if [[ ! -f ~/wg_repair/wg_repair_launcher.sh ]]; then
+	if [[ ! -f wg_repair_launcher.sh ]]; then
+		wget https://github.com/Paulus13/wireguard-swgp/raw/main/wg_repair_launcher.sh
+	fi
+	mv wg_repair_launcher.sh ~/wg_repair
+	chmod +x ~/wg_repair/wg_repair_launcher.sh
+else
+	chmod +x ~/wg_repair/wg_repair_launcher.sh
 fi
 }
 
