@@ -68,7 +68,7 @@ else
 fi
 }
 
-function write_log() {
+function write_log {
 t_str=$1
 
 my_date=$(date '+%d %b %Y %H:%M:%S')
@@ -83,6 +83,13 @@ fi
 
 
 mountNFSBackup
+
+if [[ -d $script_path_local ]]
+	mkdir $script_path_local
+	if [[ $mount_success -eq 1 ]]; then
+		cp $script_full_path_share $script_full_path_local
+	fi
+fi
 
 if [[ $mount_success -eq 1 ]]; then
 	share_script_change_time=$(stat -c %Y $script_full_path_share)
