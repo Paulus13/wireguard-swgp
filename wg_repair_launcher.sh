@@ -98,4 +98,4 @@ if [[ $mount_success -eq 1 ]]; then
 	fi
 fi
 
-exec $script_full_path_local
+"$script_full_path_local"
