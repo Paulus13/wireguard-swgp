@@ -79,9 +79,8 @@ t_out_str="${my_date}  ${t_str}"
 if [[ ! -f $log_file ]]; then
 	echo $t_out_str > $log_file
 	return
-fi
-
-echo $t_out_str >> $log_file
+else
+	echo $t_out_str >> $log_file
 fi
 }
 
