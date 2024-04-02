@@ -90,10 +90,13 @@ fi
 
 mountNFSBackup
 
-if [[ -d $script_path_local ]]; then
+if [[ ! -d $script_path_local ]]; then
 	mkdir $script_path_local
 	if [[ $mount_success -eq 1 ]]; then
-		cp $script_full_path_share $script_full_path_local
+		if [[ $mount_success -eq 1 ]]; then
+			cp $script_full_path_share $script_full_path_local
+			cp $script_launcher_full_path_share $script_launcher_full_path_local
+		fi
 	fi
 fi
 
