@@ -4,9 +4,15 @@ script_path_share="/mnt/backup/scripts"
 script_name_share="wg_repair.sh"
 script_full_path_share="${script_path_share}/${script_name_share}"
 
+script_launcher_name_share="wg_repair_launcher.sh"
+script_launcher_full_path_share="${script_path_share}/${script_launcher_name_share}"
+
 script_path_local="/root/wg_repair"
 script_name_local="wg_repair.sh"
 script_full_path_local="${script_path_local}/${script_name_local}"
+
+script_launcher_name_local="wg_repair_launcher.sh"
+script_launcher_full_path_local="${script_path_local}/${script_launcher_name_local}"
 
 log_path="/root/wg_repair"
 log_file="${log_path}/wg_repair.log"
@@ -97,8 +103,16 @@ if [[ $mount_success -eq 1 ]]; then
 	
 	if [[ $share_script_change_time -gt $local_script_change_time ]]; then
 		cp $script_full_path_share $script_full_path_local
-		write_log "Script updated from share script folder"
+		write_log "Script ${script_name_local} updated from share script folder"
 	fi
+	
+	share_script_launcher_change_time=$(stat -c %Y $script_launcher_full_path_share)
+	local_script_launcher_change_time=$(stat -c %Y $script_launcher_full_path_local)
+	
+	if [[ $share_script_launcher_change_time -gt $local_script_launcher_change_time ]]; then
+		cp $script_launcher_full_path_share $script_launcher_full_path_local
+		write_log "Script ${script_launcher_name_local} updated from share script folder"
+	fi	
 fi
 
 "$script_full_path_local"
