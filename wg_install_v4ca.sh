@@ -6,7 +6,8 @@ yellow='\033[1;33m'
 plain='\033[0m'
 
 # for makecloud vps
-swgp_json="/etc/swgp-go/server1.json"
+swgp_json_wg0="/etc/swgp-go/server0.json"
+swgp_json_wg3="/etc/swgp-go/server3.json"
 
 if [[ ! -z $1 ]]; then
 	expert_func=$1
@@ -1502,7 +1503,15 @@ fi
 }
 
 function checkSWGP() {
-json_serv_path=$swgp_json
+if [[ -z $1 ]]; then
+	t_wg_int_name="wg0"
+	json_serv_path="/etc/swgp-go/server0.json"
+else
+	t_wg_int_name=$1
+	t_wg_int_name_num=$(echo $t_wg_int_name | sed 's/wg//g')
+	json_serv_path="/etc/swgp-go/server$(t_wg_int_name_num).json"
+fi
+
 if [ -f $json_serv_path ]; then
 	inst_swgp=1
 	list_port=$(grep proxyListen $json_serv_path | awk '{print $2}' | sed 's/[":,]//g')
