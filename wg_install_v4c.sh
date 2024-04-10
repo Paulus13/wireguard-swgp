@@ -1835,8 +1835,8 @@ fi
 if [[ "$cron" =~ ^[yY]$ ]]; then
 	checkPrepare
 	
-	echo "@reboot  ${exe_str}" >> mycron
-	echo "@hourly  ${exe_str}" >> mycron
+	echo "@reboot ${exe_str}" >> mycron
+	echo "@hourly ${exe_str}" >> mycron
 	crontab mycron
 	rm mycron 
 	
