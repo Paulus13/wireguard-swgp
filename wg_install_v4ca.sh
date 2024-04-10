@@ -180,7 +180,7 @@ function manageMenuExp() {
 		manageMenuExp
 		;;	
 	4)
-		selectWGInt
+		selectWGIntForClients
 		showUserNew $t_sel_wg
 		MENU_OPTION=0
 		manageMenuExp
@@ -712,7 +712,7 @@ if [[ $wg_conf_num -eq 0 ]]; then
 elif [[ $wg_conf_num -eq 1 ]]; then
 	wg_int_name=$(ls /etc/wireguard/wg*.conf | awk -F/ '{print $4}' | sed 's/.conf//g')
 else
-	selectWGInt
+	selectWGIntForClients
 	wg_int_name=$t_sel_wg
 fi
 
@@ -971,6 +971,7 @@ fi
 
 cli_conf_folder="/etc/wireguard/${cli_folder}/${cli_name}"
 cli_conf_full_path="${cli_conf_folder}/${cli_name}.conf"
+cli_conf_full_path_swgp="${cli_conf_folder}/${cli_name}_obfus.conf"
 int_conf_path="/etc/wireguard/${t_wg_int}.conf"
 
 
@@ -985,9 +986,12 @@ else
 	fi
 fi
 
-# echo "cli_conf_folder = $cli_conf_folder"
-# echo "cli_conf_full_path = $cli_conf_full_path"
-# echo "int_conf_path = $int_conf_path"
+checkSWGP
+if [[ $inst_swgp -eq 1 ]]; then
+	obfus_line_swgp="ObfuscateKey = ${t_psk}"
+else
+	obfus_line_swgp=""
+fi
 
 if [[ $t_first_client -eq 1 ]]; then
 	t_priv_key_conf=$serv_privkey
@@ -997,6 +1001,7 @@ if [[ $t_first_client -eq 1 ]]; then
 	t_ep_conf=$t_ep	
 	t_subnet_conf=$t_subnet
 	t_last_ip_conf=1
+	obfus_line=$(cat $int_conf_path | grep ObfuscateKey)
 else
 	getAllWGParam $t_wg_int
 fi
@@ -1041,6 +1046,23 @@ PublicKey = $cli_pubkey
 PresharedKey = $cli_preshared_key
 AllowedIPs = $cli_ip
 EOF
+
+if [[ -z $obfus_line && ! -z $obfus_line_swgp ]]; then
+cat > $cli_conf_full_path_swgp << EOF
+[Interface]
+PrivateKey = $cli_privkey
+$obfus_line_swgp
+Address = $cli_ip
+$t_dns_line_conf
+
+[Peer]
+PublicKey = $t_pub_key_conf
+PresharedKey = $cli_preshared_key
+AllowedIPs = $allow_ip
+Endpoint = $t_ep_conf
+PersistentKeepalive=25
+EOF
+fi
 
 # Restart Wireguard
 serv_line=$(ls /etc/systemd/system/multi-user.target.wants/*@${t_wg_int}.service)
