@@ -245,7 +245,7 @@ function manageMenuSimple() {
 		manageMenuSimple	
 		;;	
 	4)
-		selectWGInt
+		selectWGIntForClients
 		showUserNew $t_sel_wg
 		MENU_OPTION=0
 		manageMenuSimple
