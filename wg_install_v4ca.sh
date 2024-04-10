@@ -1757,6 +1757,7 @@ done
 
 function createWGIntListForClients {
 t_list=""
+j=0
 
 readarray myArr <<< $(wg | grep interface | awk '{print $2}')
 for i in ${myArr[@]}
@@ -1765,7 +1766,10 @@ do
 	checkWGIntForClients $t_int
 	if [[ $wg_for_cl -eq 1 ]]; then
 		t_list="$t_list $t_int"
-		def_int_cl=$t_int
+		j=$j+1
+		if [[ $j -eq 1 ]]; then
+			def_int_cl=$t_int
+		fi
 	fi
 done
 }
