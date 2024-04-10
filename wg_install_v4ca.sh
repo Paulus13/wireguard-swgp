@@ -1085,6 +1085,15 @@ if [[ $show_conf -eq 1 ]]; then
 	echo
 	echo "# Display $cli_name.conf "
 	cat $cli_conf_full_path
+	
+	if [[ -f $cli_conf_full_path_swgp ]]; then
+		echo
+		echo "# Display ${cli_name}_obfus.conf QR Code"
+		qrencode -t ansiutf8 < $cli_conf_full_path_swgp
+		echo
+		echo "# Display ${cli_name}_obfus.conf "
+		cat $cli_conf_full_path_swgp
+	fi
 fi
 }
 
