@@ -5,6 +5,9 @@ green='\033[1;32m'
 yellow='\033[1;33m'
 plain='\033[0m'
 
+# for makecloud vps
+swgp_json="/etc/swgp-go/server1.json"
+
 if [[ ! -z $1 ]]; then
 	expert_func=$1
 else
@@ -276,6 +279,41 @@ else
 	if [ -z $t_wg_int ]
 	then
 		 t_wg_int=$wg_int_def
+	fi
+
+	checkWGIntExist $t_wg_int
+	until [[ $wg_int_exist -eq 1 ]]; do
+		echo "$t_wg_int: invalid selection."
+		read -p "What interface use? " t_wg_int
+		checkWGIntExist $t_wg_int
+	done
+	t_sel_wg=$t_wg_int
+fi
+}
+
+function selectWGIntForClients {
+wg_conf_num=$(ls /etc/wireguard/wg*.conf 2>/dev/null | wc -l)
+if [[ $wg_conf_num -eq 0 ]]; then
+	t_sel_wg=""
+	echo
+	echo -e "${red}No WG interface exist.${plain}"
+	return
+fi
+
+wg_int_list_num=$(wg | grep interface | wc -l)
+wg_int_def=$(wg | grep interface | head -1 | awk '{print $2}')
+
+if [[ $wg_int_list_num -eq 1 ]]; then
+	t_sel_wg=$(wg | grep interface | awk '{print $2}')
+else
+	createWGIntListForClients
+	
+	echo 
+	echo "This WG interfaces exist: $t_list"
+	read -p "What interface use? default - $def_int_cl: " t_wg_int
+	if [ -z $t_wg_int ]
+	then
+		 t_wg_int=$def_int_cl
 	fi
 
 	checkWGIntExist $t_wg_int
@@ -1352,6 +1390,17 @@ cat $conf_path_full
 echo
 qrencode -t ansiutf8 < $conf_path_full
 echo
+
+conf_obfus_path_full="${client_conf_path}/${t_user}/${t_user}_obfus.conf"
+if [[ -f $conf_obfus_path_full ]]; then
+	echo
+	echo -e "${green}$t_user obfuscate config${plain}"
+	echo
+	cat $conf_obfus_path_full
+	echo
+	qrencode -t ansiutf8 < $conf_obfus_path_full
+	echo
+fi
 }
 
 function checkUserNew() {
@@ -1431,7 +1480,7 @@ fi
 }
 
 function checkSWGP() {
-json_serv_path="/etc/swgp-go/config.json"
+json_serv_path=$swgp_json
 if [ -f $json_serv_path ]; then
 	inst_swgp=1
 	list_port=$(grep proxyListen $json_serv_path | awk '{print $2}' | sed 's/[":,]//g')
@@ -1704,6 +1753,32 @@ do
 	t_int=${i}
 	t_list="$t_list $t_int"
 done
+}
+
+function createWGIntListForClients {
+t_list=""
+
+readarray myArr <<< $(wg | grep interface | awk '{print $2}')
+for i in ${myArr[@]}
+do 
+	t_int=${i}
+	checkWGIntForClients $t_int
+	if [[ $wg_for_cl -eq 1 ]]; then
+		t_list="$t_list $t_int"
+		def_int_cl=$t_int
+	fi
+done
+}
+
+function checkWGIntForClients {
+t_wg_int_cl=$1
+wg_conf_ep_line=$(grep Endpoint /etc/wireguard/${t_wg_int_cl}.conf)
+if [[ ! -z $wg_conf_ep_line ]]; then
+	wg_for_cl=0
+else
+	wg_for_cl=1
+fi
+
 }
 
 function showWGIntInfo {
