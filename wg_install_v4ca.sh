@@ -826,7 +826,7 @@ fi
 new_client_conf_path="/etc/wireguard/clients${new_wg_int_num}"
 
 if [[ $t_obfus -eq 1 ]]; then
-	checkSWGP
+	checkSWGP $t_orig_wg_int
 	if [[ $inst_swgp -eq 1 ]]; then
 		t_obfus_key=$t_psk
 	else
@@ -1511,14 +1511,43 @@ else
 fi
 }
 
+function checkSWGPServType {
+t_serv_line=$(systemctl | grep "Simple WireGuard")
+if [[ -z $t_serv_line ]]; then
+	t_serv_conf=0
+else
+	t_serv_conf=1
+	t_serv_line_type=$(echo $t_serv_line | grep @)
+	if [[ -z $t_serv_line_type ]]; then
+		swgp_serv_type=1
+	else
+		swgp_serv_type=2
+	fi
+fi
+}
+
 function checkSWGP() {
+checkSWGPServType
+if [[ $t_serv_conf -eq 0 ]]; then
+	inst_swgp=0
+	return
+fi
+
 if [[ -z $1 ]]; then
 	t_wg_int_name="wg0"
-	json_serv_path="/etc/swgp-go/server0.json"
+	if [[ $swgp_serv_type -eq 1 ]]; then
+		json_serv_path="/etc/swgp-go/config.json"
+	elif [[ $swgp_serv_type -eq 2 ]]; then
+		json_serv_path="/etc/swgp-go/server0.json"
+	fi
 else
 	t_wg_int_name=$1
-	t_wg_int_name_num=$(echo $t_wg_int_name | sed 's/wg//g')
-	json_serv_path="/etc/swgp-go/server$(t_wg_int_name_num).json"
+	if [[ $swgp_serv_type -eq 1 ]]; then
+		json_serv_path="/etc/swgp-go/config.json"
+	elif [[ $swgp_serv_type -eq 2 ]]; then
+		t_wg_int_name_num=$(echo $t_wg_int_name | sed 's/wg//g')
+		json_serv_path="/etc/swgp-go/server$(t_wg_int_name_num).json"
+	fi
 fi
 
 if [ -f $json_serv_path ]; then
