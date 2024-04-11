@@ -915,16 +915,18 @@ else
 fi
 
 # Restart Wireguard
-serv_line=$(ls /etc/systemd/system/multi-user.target.wants/*@${t_new_wg_int}.service)
-serv_line_grep=$(echo $serv_line | grep "wg-quick-local")
+# serv_line=$(ls /etc/systemd/system/multi-user.target.wants/*@${t_new_wg_int}.service)
+# serv_line_grep=$(echo $serv_line | grep "wg-quick-local")
 
-if [ -z $serv_line_grep ]; then
-	systemctl stop wg-quick@${t_new_wg_int}
-	systemctl start wg-quick@${t_new_wg_int}
-else
-	systemctl stop wg-quick-local@${t_new_wg_int}
-	systemctl start wg-quick-local@${t_new_wg_int}
-fi
+# if [ -z $serv_line_grep ]; then
+	# systemctl stop wg-quick@${t_new_wg_int}
+	# systemctl start wg-quick@${t_new_wg_int}
+# else
+	# systemctl stop wg-quick-local@${t_new_wg_int}
+	# systemctl start wg-quick-local@${t_new_wg_int}
+# fi
+serv_line=$(systemctl | grep wg-quick | grep service | grep "$t_new_wg_int" | awk '{print $1}')
+systemctl restart $serv_line
 
 cd $t_pwd
 
@@ -1066,16 +1068,18 @@ EOF
 fi
 
 # Restart Wireguard
-serv_line=$(ls /etc/systemd/system/multi-user.target.wants/*@${t_wg_int}.service)
-serv_line_grep=$(echo $serv_line | grep "wg-quick-local")
+# serv_line=$(ls /etc/systemd/system/multi-user.target.wants/*@${t_wg_int}.service)
+# serv_line_grep=$(echo $serv_line | grep "wg-quick-local")
+serv_line=$(systemctl | grep wg-quick | grep service | grep "$t_wg_int" | awk '{print $1}')
+systemctl restart $serv_line
 
-if [ -z $serv_line_grep ]; then
-	systemctl stop wg-quick@${t_wg_int}
-	systemctl start wg-quick@${t_wg_int}
-else
-	systemctl stop wg-quick-local@${t_wg_int}
-	systemctl start wg-quick-local@${t_wg_int}
-fi
+# if [ -z $serv_line_grep ]; then
+	# systemctl stop wg-quick@${t_wg_int}
+	# systemctl start wg-quick@${t_wg_int}
+# else
+	# systemctl stop wg-quick-local@${t_wg_int}
+	# systemctl start wg-quick-local@${t_wg_int}
+# fi
 
 # Show QR config to display
 if [[ $show_conf -eq 1 ]]; then
