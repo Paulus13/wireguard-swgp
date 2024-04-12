@@ -1549,7 +1549,7 @@ else
 		json_serv_path="/etc/swgp-go/config.json"
 	elif [[ $swgp_serv_type -eq 2 ]]; then
 		t_wg_int_name_num=$(echo $t_wg_int_name | sed 's/wg//g')
-		json_serv_path="/etc/swgp-go/server$(t_wg_int_name_num).json"
+		json_serv_path="/etc/swgp-go/server${t_wg_int_name_num}.json"
 	fi
 fi
 
@@ -1926,7 +1926,7 @@ t_pub_key_conf=$(cat $client_conf_path/*/*.conf | grep PublicKey | head -1 | awk
 t_dns_line_conf=$(cat $client_conf_path/*/*.conf | grep DNS | head -1)
 t_ep_conf=$(cat $client_conf_path/*/*.conf | grep Endpoint | head -1 | awk '{print $3}')
 
-last_ip=$(cat $int_conf_path | grep AllowedIPs | tail -1 | awk '{print $3}' | sed 's/\/32//')
+last_ip=$(cat $int_conf_path | grep AllowedIPs | grep -v "#" | tail -1 | awk '{print $3}' | sed 's/\/32//')
 last_ip1=$(echo $last_ip | awk -F. '{print $1}')
 last_ip2=$(echo $last_ip | awk -F. '{print $2}')
 last_ip3=$(echo $last_ip | awk -F. '{print $3}')
