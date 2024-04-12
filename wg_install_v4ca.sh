@@ -977,7 +977,6 @@ cli_conf_full_path="${cli_conf_folder}/${cli_name}.conf"
 cli_conf_full_path_swgp="${cli_conf_folder}/${cli_name}_obfus.conf"
 int_conf_path="/etc/wireguard/${t_wg_int}.conf"
 
-
 if [[ ! -d "/etc/wireguard/${cli_folder}" ]]; then
 	t_first_client=1
 else
@@ -989,7 +988,7 @@ else
 	fi
 fi
 
-checkSWGP
+checkSWGP $t_wg_int
 if [[ $inst_swgp -eq 1 ]]; then
 	obfus_line_swgp="ObfuscateKey = ${t_psk}"
 else
