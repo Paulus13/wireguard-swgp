@@ -1926,7 +1926,7 @@ t_pub_key_conf=$(cat $client_conf_path/*/*.conf | grep PublicKey | head -1 | awk
 t_dns_line_conf=$(cat $client_conf_path/*/*.conf | grep DNS | head -1)
 t_ep_conf=$(cat $client_conf_path/*/*.conf | grep Endpoint | head -1 | awk '{print $3}')
 
-last_ip=$(cat $int_conf_path | grep AllowedIPs | grep -v "#" | tail -1 | awk '{print $3}' | sed 's/\/32//')
+last_ip=$(cat $int_conf_path | grep AllowedIPs | grep -v "#" | tail -1 | awk '{print $3}' | sed 's/\/32//' | sed 's/,//')
 last_ip1=$(echo $last_ip | awk -F. '{print $1}')
 last_ip2=$(echo $last_ip | awk -F. '{print $2}')
 last_ip3=$(echo $last_ip | awk -F. '{print $3}')
