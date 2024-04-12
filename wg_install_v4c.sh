@@ -935,7 +935,6 @@ cli_conf_folder="/etc/wireguard/${cli_folder}/${cli_name}"
 cli_conf_full_path="${cli_conf_folder}/${cli_name}.conf"
 int_conf_path="/etc/wireguard/${t_wg_int}.conf"
 
-
 if [[ ! -d "/etc/wireguard/${cli_folder}" ]]; then
 	t_first_client=1
 else
