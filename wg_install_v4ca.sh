@@ -1854,7 +1854,6 @@ if [[ ! -z $wg_conf_ep_line ]]; then
 else
 	wg_for_cl=1
 fi
-
 }
 
 function showWGIntInfo {
