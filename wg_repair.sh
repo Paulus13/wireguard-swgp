@@ -166,11 +166,25 @@ fi
 }
 
 function compactLog {
-log_lines_num=$(cat $log_file | wc -l)
-if [[ $log_lines_num -gt 200 ]]; then
-	grep -v "repair not needed" $log_file > $log_file_tmp
-	mv $log_file_tmp $log_file
+max_empty_log_lines=40
+empty_log_lines=$(cat $log_file | grep -i "repair not needed" | wc -l)
+if [[ $empty_log_lines -ge $max_empty_log_lines ]]; then
+	last_lines_reboot=$(cat $log_file | tail -8 | grep -iv "repair not needed")
+	if [[ -z $last_lines_reboot ]]; then
+		cat $log_file | grep -iv "repair not needed" > $log_file_tmp
+		cat $log_file | tail -8 >> $log_file_tmp
+		mv $log_file_tmp $log_file
+	else
+		cat $log_file | grep -iv "repair not needed" > $log_file_tmp
+		mv $log_file_tmp $log_file
+	fi
 fi
+
+# log_lines_num=$(cat $log_file | wc -l)
+# if [[ $log_lines_num -gt 200 ]]; then
+	# grep -v "repair not needed" $log_file > $log_file_tmp
+	# mv $log_file_tmp $log_file
+# fi
 }
 
 function checkUptime {
