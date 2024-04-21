@@ -440,10 +440,11 @@ fi
 }
 
 function newWGInt {
-checkWGClassic
+
+# checkWGClassic
 checkWGOBFUS 0
 
-if [[ $wg_class_inst -eq 0 && $wg_class_inst -eq 0 ]]; then
+if [[ $wg_class_inst -eq 0 && $wg_obfus_inst -eq 0 ]]; then
 	echo
 	echo -e "${red}WG binarys not installed."
 	echo -e "Install it before creating interface.${plain}"
@@ -488,7 +489,7 @@ else
 	echo "Creating $new_wg_name interface"
 fi
 
-checkWGOBFUS
+# checkWGOBFUS
 if [[ $wg_obfus_inst -eq 1 ]]; then
 	read -p "Use obfuscate? [Y/n]: " t_obf_use
 	if [ -z $t_obf_use ]
@@ -1725,7 +1726,6 @@ if [[ -z $wg_module ]]; then
 	wg_class_inst=0
 elif [[ ! -z $wg_module && -z $wg_module_obfus ]]; then
 	wg_obfus_inst=0
-	echo
 	if [[ -f $bin_path_classic ]]; then
 		wg_class_inst=1
 	else
@@ -1733,7 +1733,6 @@ elif [[ ! -z $wg_module && -z $wg_module_obfus ]]; then
 	fi
 elif [[ ! -z $wg_module && ! -z $wg_module_obfus ]]; then
 	wg_obfus_inst=1
-	echo
 	if [[ -f $bin_path_classic ]]; then
 		wg_class_inst=1
 	else
