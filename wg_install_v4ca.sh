@@ -1070,8 +1070,19 @@ fi
 # Restart Wireguard
 # serv_line=$(ls /etc/systemd/system/multi-user.target.wants/*@${t_wg_int}.service)
 # serv_line_grep=$(echo $serv_line | grep "wg-quick-local")
-serv_line=$(systemctl | grep wg-quick | grep service | grep "$t_wg_int" | awk '{print $1}')
-systemctl restart $serv_line
+
+if [[ $t_first_client -eq 1 ]]; then
+	if [[ -z $obfus_line ]]; then
+		serv_line="wg-quick@${t_wg_int}.service"
+	else
+		serv_line="wg-quick-local@${t_wg_int}.service"
+	fi
+	systemctl enable $serv_line
+	systemctl start $serv_line
+else
+	serv_line=$(systemctl | grep wg-quick | grep service | grep "$t_wg_int" | awk '{print $1}')
+	systemctl restart $serv_line
+fi
 
 # if [ -z $serv_line_grep ]; then
 	# systemctl stop wg-quick@${t_wg_int}
