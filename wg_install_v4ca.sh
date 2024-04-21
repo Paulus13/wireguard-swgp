@@ -605,10 +605,11 @@ EOF
 # cp -f ./${wg_int}.conf.def ./${wg_int}.conf
 
 if [ -f /lib/systemd/system/wg-quick-local@.service ]; then
-	systemctl enable wg-quick-local@${wg_int}.service
+	wg_serv_name="wg-quick-local@${wg_int}.service"
 else
-	systemctl enable wg-quick@${wg_int}.service
+	wg_serv_name="wg-quick@${wg_int}.service"
 fi
+systemctl enable $wg_serv_name
 
 cd $t_pwd
 
@@ -1072,12 +1073,8 @@ fi
 # serv_line_grep=$(echo $serv_line | grep "wg-quick-local")
 
 if [[ $t_first_client -eq 1 ]]; then
-	if [[ -z $obfus_line ]]; then
-		serv_line="wg-quick@${t_wg_int}.service"
-	else
-		serv_line="wg-quick-local@${t_wg_int}.service"
-	fi
-	systemctl enable $serv_line
+	serv_line=$wg_serv_name
+	# systemctl enable $serv_line
 	systemctl start $serv_line
 else
 	serv_line=$(systemctl | grep wg-quick | grep service | grep "$t_wg_int" | awk '{print $1}')
