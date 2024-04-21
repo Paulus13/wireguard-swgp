@@ -1002,12 +1002,17 @@ if [[ $t_first_client -eq 1 ]]; then
 	t_pub_key_conf=$serv_pubkey
 	# t_dns_conf=$cl_dns
 	t_dns_line_conf="DNS = ${cl_dns}"
-	t_ep_conf=$t_ep	
+	t_ep_conf=$t_ep
 	t_subnet_conf=$t_subnet
 	t_last_ip_conf=1
 	obfus_line=$(cat $int_conf_path | grep ObfuscateKey)
 else
 	getAllWGParam $t_wg_int
+fi
+
+if [[ $inst_swgp -eq 1 ]]; then
+	t_ep_host=$(echo $t_ep_conf | awk -F: '{print $1}')
+	t_ep_conf_swgp="${t_ep_host}:${list_port}"
 fi
 
 mkdir -p $cli_conf_folder
@@ -1063,7 +1068,7 @@ $t_dns_line_conf
 PublicKey = $t_pub_key_conf
 PresharedKey = $cli_preshared_key
 AllowedIPs = $allow_ip
-Endpoint = $t_ep_conf
+Endpoint = $t_ep_conf_swgp
 PersistentKeepalive=25
 EOF
 fi
