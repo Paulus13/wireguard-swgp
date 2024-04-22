@@ -1,19 +1,10 @@
 #!/bin/bash
 
-red='\033[1;31m'
-green='\033[1;32m'
-yellow='\033[1;33m'
-plain='\033[0m'
 
 # for makecloud vps
 swgp_json_wg0="/etc/swgp-go/server0.json"
 swgp_json_wg3="/etc/swgp-go/server3.json"
 
-if [[ ! -z $1 ]]; then
-	expert_func=$1
-else
-	expert_func="no_exp"
-fi
 
 function initialCheck() {
 if [ "$EUID" -ne 0 ]
@@ -40,73 +31,6 @@ if [[ "$os_version" -le 2004 ]]; then
 else
 	old_kern=0
 fi
-}
-
-function selectExtIP() {
-ext_ip=$(dig @resolver4.opendns.com myip.opendns.com +short -4)
-
-if [ -z $ext_ip ]; then
-	eth_def=$(ls /sys/class/net | awk '/^e/{print}' | head -n1)
-	loc_ip=$(ip a | grep $eth_def | grep inet | awk '{print $2}' | sed 's/\/24//g')
-	ext_ip=$loc_ip
-fi
-
-read -p "Enter your WAN IP (default $ext_ip): " ip_new
-
-if [[ -z $ip_new ]]; then 
-	ip_new=$ext_ip
-fi
-
-validIP $ip_new
-until [[ $? -eq 0 ]]; do
-	echo $ip_new "looks like not good IP"
-	read -p "Enter the IP Address " ip_new
-	validIP $ip_new
-done
-		
-ip=$ip_new	
-}
-
-# Проверка правильности IP-адреса:
-# Способ применения:
-#      validIP IP_АДРЕС
-#      if [[ $? -eq 0 ]]; then echo good; else echo bad; fi
-#   ИЛИ
-#      if validIP IP_ADDRESS; then echo good; else echo bad; fi
-#
-
-function validIP() {
-  local ip=$1
-  local stat=1
-
-  if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-    OIFS=$IFS
-    IFS='.'
-    ip=($ip)
-    IFS=$OIFS
-    [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
-      && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
-    stat=$?
-  fi
-  return $stat
-}
-
-function simpleRND() {
-	rnd_from=1
-	rnd_to=200
-
-	if [[ ! -z "$1" && -z "$2" ]]
-		then rnd_from=$1
-	fi
-
-	if [[ ! -z "$1" && ! -z "$2" ]]
-	then
-		rnd_from=$1
-		rnd_to=$2			
-	fi
-	
-	rnd_mult=$(( 32767/($rnd_to-$rnd_from+1) ))
-	my_rnd=$(( $rnd_from+$RANDOM/$rnd_mult))
 }
 
 function simpleRND2() {
@@ -226,9 +150,7 @@ fi
 
 function genClientConf {
 cli_name=$1
-# cli_folder=$2
 t_wg_int=$2
-# t_first_client=$4
 if [[ -z $3 ]]; then
 	show_conf=0
 else
@@ -269,7 +191,6 @@ fi
 if [[ $t_first_client -eq 1 ]]; then
 	t_priv_key_conf=$serv_privkey
 	t_pub_key_conf=$serv_pubkey
-	# t_dns_conf=$cl_dns
 	t_dns_line_conf="DNS = ${cl_dns}"
 	t_ep_conf=$t_ep
 	t_subnet_conf=$t_subnet
@@ -517,3 +438,17 @@ t_last_ip_conf=$(echo $last_ip | awk -F. '{print $4}')
 
 orig_path=$(pwd)
 initialCheck
+
+if [[ ! -z $1 ]]; then
+	t_cli_name=$1
+else
+	t_cli_name="vpnuser_${my_rnd}"
+fi
+
+if [[ ! -z $2 ]]; then
+	t_wg_int=$2
+else
+	simpleRND2 1 99
+	t_wg_int="wg3"
+fi
+
