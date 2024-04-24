@@ -33,7 +33,7 @@ else
 fi
 }
 
-function simpleRND2() {
+function simpleRND2 {
 	rnd_from=1
 	rnd_to=200
 
@@ -237,6 +237,7 @@ AllowedIPs = $allow_ip
 Endpoint = $t_ep_conf
 PersistentKeepalive=25
 EOF
+# echo $cli_conf_full_path generated
 
 cat >> $int_conf_path << EOF
 
@@ -261,6 +262,7 @@ AllowedIPs = $allow_ip
 Endpoint = $t_ep_conf_swgp
 PersistentKeepalive=25
 EOF
+# echo $cli_conf_full_path_swgp generated
 fi
 
 # Restart Wireguard
@@ -269,7 +271,6 @@ fi
 
 if [[ $t_first_client -eq 1 ]]; then
 	serv_line=$wg_serv_name
-	# systemctl enable $serv_line
 	systemctl start $serv_line
 else
 	serv_line=$(systemctl | grep wg-quick | grep service | grep "$t_wg_int" | awk '{print $1}')
@@ -286,21 +287,22 @@ fi
 
 # Show QR config to display
 if [[ $show_conf -eq 1 ]]; then
-	echo
-	echo "# Display $cli_name.conf QR Code"
-	qrencode -t ansiutf8 < $cli_conf_full_path
-	echo
-	echo "# Display $cli_name.conf "
+	# echo
+	# echo "# Display $cli_name.conf QR Code"
+	# qrencode -t ansiutf8 < $cli_conf_full_path
+	# echo
+	# echo "# Display $cli_name.conf "
+	echo $cli_conf_full_path
 	cat $cli_conf_full_path
 	
-	if [[ -f $cli_conf_full_path_swgp ]]; then
-		echo
-		echo "# Display ${cli_name}_obfus.conf QR Code"
-		qrencode -t ansiutf8 < $cli_conf_full_path_swgp
-		echo
-		echo "# Display ${cli_name}_obfus.conf "
-		cat $cli_conf_full_path_swgp
-	fi
+	# if [[ -f $cli_conf_full_path_swgp ]]; then
+		# echo
+		# echo "# Display ${cli_name}_obfus.conf QR Code"
+		# qrencode -t ansiutf8 < $cli_conf_full_path_swgp
+		# echo
+		# echo "# Display ${cli_name}_obfus.conf "
+		# cat $cli_conf_full_path_swgp
+	# fi
 fi
 }
 
@@ -438,17 +440,30 @@ t_last_ip_conf=$(echo $last_ip | awk -F. '{print $4}')
 
 orig_path=$(pwd)
 initialCheck
-
+	
 if [[ ! -z $1 ]]; then
 	t_cli_name=$1
+	t_cli_name_orig=$t_cli_name
+	t_cli_type=1
 else
-	t_cli_name="vpnuser_${my_rnd}"
+	simpleRND2 1 99
+	t_cli_name="wguser${my_rnd}"
+	t_cli_name_orig="wguser"
+	t_cli_type=2
 fi
 
 if [[ ! -z $2 ]]; then
 	t_wg_int=$2
 else
-	simpleRND2 1 99
 	t_wg_int="wg3"
 fi
 
+checkUserNew $t_cli_name $t_wg_int
+until [[ $user_check -eq 0 ]]; do
+	simpleRND2 1 99
+	t_cli_name="${t_cli_name_orig}${my_rnd}"
+
+	checkUserNew $t_cli_name $t_wg_int
+done
+
+genClientConf $t_cli_name $t_wg_int 1
