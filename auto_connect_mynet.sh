@@ -238,7 +238,7 @@ fi
 
 function checkPrivNetAvailable {
 p_loss=$(ping -qw 3 192.168.10.10 2>/dev/null | grep 'packet loss' | cut -d ' ' -f 6 | sed 's/%//')
-if [[ $p_loss -eq 100 || $p_loss = "-1" ]]; then
+if [[ $p_loss -eq 100 || $p_loss = "+1" ]]; then
 	net_avail=0
 else
 	net_avail=1
