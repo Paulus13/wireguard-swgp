@@ -298,8 +298,8 @@ if [[ ! -f /root/backup/my_backup_v3.sh ]]; then
 	mountNFSBackup
 	if [[ $mount_success -eq 1 ]]; then
 		mkdir -p /root/backup
-		cp /mnt/backup/my_backup_launcher.sh /root/backup
-		cp /mnt/backup/my_backup_v3.sh /root/backup
+		cp /mnt/backup/scripts/my_backup_launcher.sh /root/backup
+		cp /mnt/backup/scripts/my_backup_v3.sh /root/backup
 		
 		chmod +x /root/backup/*.sh
 		/root/backup/my_backup_v3.sh nobackup
