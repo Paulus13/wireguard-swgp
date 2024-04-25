@@ -5,6 +5,7 @@
 swgp_json_wg0="/etc/swgp-go/server0.json"
 swgp_json_wg3="/etc/swgp-go/server3.json"
 
+local_log="/root/key_renew/wg_gen_cli.log"
 
 function initialCheck() {
 if [ "$EUID" -ne 0 ]
@@ -237,7 +238,9 @@ AllowedIPs = $allow_ip
 Endpoint = $t_ep_conf
 PersistentKeepalive=25
 EOF
-# echo $cli_conf_full_path generated
+
+my_date=$(date '+%d %b %Y %H:%M:%S')
+echo "${my_date} ${cli_conf_full_path} generated >> $local_log"
 
 cat >> $int_conf_path << EOF
 
@@ -262,7 +265,9 @@ AllowedIPs = $allow_ip
 Endpoint = $t_ep_conf_swgp
 PersistentKeepalive=25
 EOF
-# echo $cli_conf_full_path_swgp generated
+
+my_date=$(date '+%d %b %Y %H:%M:%S')
+echo "${my_date} ${cli_conf_full_path_swgp} generated >> $local_log"
 fi
 
 # Restart Wireguard
@@ -478,6 +483,7 @@ else
 	cli_conf_folder="/etc/wireguard/${cli_folder}/${t_cli_name}"
 	cli_conf_full_path="${cli_conf_folder}/${t_cli_name}.conf"
 	
-	echo $cli_conf_full_path
+	my_date=$(date '+%d %b %Y %H:%M:%S')
+	echo "${my_date} ${cli_conf_full_path} exist, cat it to output" >> $local_log
 	cat $cli_conf_full_path
 fi
