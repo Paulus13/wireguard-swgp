@@ -292,7 +292,7 @@ if [[ $show_conf -eq 1 ]]; then
 	# qrencode -t ansiutf8 < $cli_conf_full_path
 	# echo
 	# echo "# Display $cli_name.conf "
-	echo $cli_conf_full_path
+	# echo $cli_conf_full_path
 	cat $cli_conf_full_path
 	
 	# if [[ -f $cli_conf_full_path_swgp ]]; then
@@ -459,11 +459,25 @@ else
 fi
 
 checkUserNew $t_cli_name $t_wg_int
-until [[ $user_check -eq 0 ]]; do
-	simpleRND2 1 99
-	t_cli_name="${t_cli_name_orig}${my_rnd}"
+# until [[ $user_check -eq 0 ]]; do
+	# simpleRND2 1 99
+	# t_cli_name="${t_cli_name_orig}${my_rnd}"
 
-	checkUserNew $t_cli_name $t_wg_int
-done
+	# checkUserNew $t_cli_name $t_wg_int
+# done
 
-genClientConf $t_cli_name $t_wg_int 1
+if [[ $user_check -eq 0 ]]; then
+	genClientConf $t_cli_name $t_wg_int 1
+else
+	wg_int_num=$(echo $t_wg_int | sed 's/wg//g')
+	if [[ $wg_int_num -eq 0 ]]; then
+		cli_folder="clients"
+	else
+		cli_folder="clients${wg_int_num}"
+	fi
+	cli_conf_folder="/etc/wireguard/${cli_folder}/${t_cli_name}"
+	cli_conf_full_path="${cli_conf_folder}/${t_cli_name}.conf"
+	
+	echo $cli_conf_full_path
+	cat $cli_conf_full_path
+fi
