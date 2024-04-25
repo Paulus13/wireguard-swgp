@@ -140,24 +140,39 @@ function genSWGPCliName {
 }
 
 function genSWGPCliName2 {
-	swgp_cli_conf_path="/etc/swgp-go"
-	num_cli=$(ls /etc/swgp-go/client*.json 2>/dev/null | wc -l)
-	if [[ $num_cli -eq 0 ]]; then
-		swgp_cli_conf_name="client.json"
-		swgp_cli_conf_full_path="${swgp_cli_conf_path}/${swgp_cli_conf_name}"
-	else
-		max_num_cli=$(ls /etc/swgp-go/client*.json | tail -1 | awk -F/ '{print $4}' | sed 's/.json//' | sed 's/client//')
-		if [[ -z $max_num_cli ]]; then
-			my_num_cli=1
-		else	
-			my_num_cli=$(( max_num_cli+1 ))
-		fi
-		swgp_cli_conf_name="client${my_num_cli}.json"
-		swgp_cli_conf_full_path="${swgp_cli_conf_path}/${swgp_cli_conf_name}"		
+swgp_cli_conf_path="/etc/swgp-go"
+num_cli=$(ls /etc/swgp-go/client*.json 2>/dev/null | wc -l)
+num_json=$(ls /etc/swgp-go/*.json 2>/dev/null | wc -l)
+
+if [[ $num_json -eq 0 ]]; then
+	swgp_cli_conf_name="client.json"
+	swgp_cli_conf_full_path="client.json"
+	return	
+fi
+
+if [[ $num_cli -eq 0 ]]; then
+	swgp_cli_conf_name="client.json"
+	swgp_cli_conf_full_path="${swgp_cli_conf_path}/${swgp_cli_conf_name}"
+else
+	max_num_cli=$(ls /etc/swgp-go/client*.json | tail -1 | awk -F/ '{print $4}' | sed 's/.json//' | sed 's/client//')
+	if [[ -z $max_num_cli ]]; then
+		my_num_cli=1
+	else	
+		my_num_cli=$(( max_num_cli+1 ))
 	fi
+	swgp_cli_conf_name="client${my_num_cli}.json"
+	swgp_cli_conf_full_path="${swgp_cli_conf_path}/${swgp_cli_conf_name}"		
+fi
 }
 
 function genWGIntName {
+wg_int_num=$(ls /etc/wireguard/wg*.conf 2>/dev/null | wc -l)
+if [[ $wg_int_num -eq 0 ]]; then
+	my_wg_int="wg0"
+	my_wg_int_path="wg0.conf"
+	return
+fi
+
 max_num_wg=$(ls /etc/wireguard/wg*.conf | tail -1 | awk -F/ '{print $4}' | sed 's/.conf//' | sed 's/wg//')
 my_num_wg=$(( max_num_wg+1 ))
 
@@ -168,7 +183,8 @@ my_wg_int_path="/etc/wireguard/${my_wg_int}.conf"
 function getFreeSWGPCliPort {
 swgp_cli_num=$(ls /etc/swgp-go/client*.json 2>/dev/null | wc -l)
 if [[ $swgp_cli_num -eq 0 ]]; then
-	swgp_cli_free_port=20222
+	# swgp_cli_free_port=20222
+	my_port_num=20222
 elif [[ $swgp_cli_num -eq 1 ]]; then
 	max_port_num=$(grep wgListen /etc/swgp-go/client*.json | awk '{print $2}' | sed 's/[:",]//g')
 	my_port_num=$(( max_port_num+1 ))
