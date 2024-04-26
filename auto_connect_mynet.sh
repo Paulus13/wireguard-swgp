@@ -363,7 +363,7 @@ makeRealWGConf
 systemctl enable wg-quick@${my_wg_int}
 systemctl start wg-quick@${my_wg_int}
 
-sleep 3
+sleep 2
 checkPrivNetAvailable
 if [[ $net_avail -eq 1 ]]; then
 	# cron_line=$(crontab -l 2>/dev/null | grep my_backup_launcher)
