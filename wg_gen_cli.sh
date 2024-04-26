@@ -5,7 +5,8 @@
 swgp_json_wg0="/etc/swgp-go/server0.json"
 swgp_json_wg3="/etc/swgp-go/server3.json"
 
-local_log="/root/key_renew/wg_gen_cli.log"
+local_log="/root/wg/wg_gen_cli.log"
+renew_str="/root/key_renew/dop_key_renew.sh"
 
 function initialCheck() {
 if [ "$EUID" -ne 0 ]
@@ -94,58 +95,6 @@ if [[ -z $t_wg_line ]]; then
 	wg_int_exist=0
 else
 	wg_int_exist=1
-fi
-}
-
-function newUserConf {
-wg_conf_num=$(ls /etc/wireguard/wg*.conf 2>/dev/null | wc -l)
-if [[ $wg_conf_num -eq 0 ]]; then
-	echo
-	echo -e "${red}No WG interface exist."
-	echo -e "Create it before creating user config.${plain}"
-	return
-elif [[ $wg_conf_num -eq 1 ]]; then
-	wg_int_name=$(ls /etc/wireguard/wg*.conf | awk -F/ '{print $4}' | sed 's/.conf//g')
-else
-	selectWGIntForClients
-	wg_int_name=$t_sel_wg
-fi
-
-wg_conf_ep_line=$(grep Endpoint /etc/wireguard/${wg_int_name}.conf)
-if [[ ! -z $wg_conf_ep_line ]]; then
-	echo
-	echo -e "${red}${wg_int_name} - this interface not for external connections${plain}"
-	echo -e "${red}Select another${plain}"
-	return
-fi
-	
-def_client_name="wg_user"
-wg_int_num=$(echo $wg_int_name | sed 's/wg//g')
-
-if [[ $wg_int_num -eq 0 ]]; then
-	client_conf_path="/etc/wireguard/clients"
-	client_conf_path_short="clients"
-else
-	client_conf_path="/etc/wireguard/clients${wg_int_num}"
-	client_conf_path_short="clients${wg_int_num}"
-fi
-
-def_client_line=$(ls ${client_conf_path}/${def_client_name} 2>/dev/null)
-if [ ! -z $def_client_line ]; then
-	simpleRND2 1 99
-	def_client_name="wg_user${my_rnd}"
-fi
-
-read -p "Enter VPN user name, [ENTER] set to default: $def_client_name: " user_name
-if [ -z $user_name ]; then
-	user_name=$def_client_name
-fi
-checkUserNew $user_name $wg_int_name
-
-if [[ $user_check -eq 1 ]]; then
-	echo "user $user_name already exist"
-else
-	genClientConf $user_name $wg_int_name 1
 fi
 }
 
@@ -240,7 +189,7 @@ PersistentKeepalive=25
 EOF
 
 my_date=$(date '+%d %b %Y %H:%M:%S')
-echo "${my_date} ${cli_conf_full_path} generated >> $local_log"
+echo "${my_date} ${cli_conf_full_path} generated" >> $local_log
 
 cat >> $int_conf_path << EOF
 
@@ -267,7 +216,7 @@ PersistentKeepalive=25
 EOF
 
 my_date=$(date '+%d %b %Y %H:%M:%S')
-echo "${my_date} ${cli_conf_full_path_swgp} generated >> $local_log"
+echo "${my_date} ${cli_conf_full_path_swgp} generated" >> $local_log
 fi
 
 # Restart Wireguard
@@ -473,7 +422,7 @@ checkUserNew $t_cli_name $t_wg_int
 
 if [[ $user_check -eq 0 ]]; then
 	genClientConf $t_cli_name $t_wg_int 1
-	/root/key_renew/dop_key_renew.sh
+	"$renew_str"
 else
 	wg_int_num=$(echo $t_wg_int | sed 's/wg//g')
 	if [[ $wg_int_num -eq 0 ]]; then
@@ -487,5 +436,5 @@ else
 	my_date=$(date '+%d %b %Y %H:%M:%S')
 	echo "${my_date} ${cli_conf_full_path} exist, cat it to output" >> $local_log
 	cat $cli_conf_full_path
-	/root/key_renew/dop_key_renew.sh
+	"$renew_str"
 fi
