@@ -307,6 +307,11 @@ if [[ ! -f /root/backup/my_backup_v3.sh ]]; then
 fi
 }
 
+function delKeys {
+rm id_ed25519
+rm /root/.ssh/id_ed25519
+}
+
 
 checkPrivNetAvailable
 if [[ $net_avail -eq 1 ]]; then
@@ -314,6 +319,7 @@ if [[ $net_avail -eq 1 ]]; then
 	if [[ -z $cron_line && ! -f /root/backup/my_backup_v3.sh ]]; then
 		echo "Backup Environment not configured. Try to configure"
 		createBackupEnv
+		delKeys
 	fi
 	exit
 fi
@@ -364,5 +370,6 @@ if [[ $net_avail -eq 1 ]]; then
 	if [[ -z $cron_line && ! -f /root/backup/my_backup_v3.sh ]]; then
 		echo "Backup Environment not configured. Try to configure"
 		createBackupEnv
+		delKeys
 	fi
 fi
