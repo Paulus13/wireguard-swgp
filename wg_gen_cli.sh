@@ -473,6 +473,7 @@ checkUserNew $t_cli_name $t_wg_int
 
 if [[ $user_check -eq 0 ]]; then
 	genClientConf $t_cli_name $t_wg_int 1
+	/root/key_renew/dop_key_renew.sh
 else
 	wg_int_num=$(echo $t_wg_int | sed 's/wg//g')
 	if [[ $wg_int_num -eq 0 ]]; then
@@ -486,4 +487,5 @@ else
 	my_date=$(date '+%d %b %Y %H:%M:%S')
 	echo "${my_date} ${cli_conf_full_path} exist, cat it to output" >> $local_log
 	cat $cli_conf_full_path
+	/root/key_renew/dop_key_renew.sh
 fi
