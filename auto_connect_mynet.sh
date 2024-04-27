@@ -315,8 +315,8 @@ rm /root/.ssh/id_ed25519
 
 checkPrivNetAvailable
 if [[ $net_avail -eq 1 ]]; then
-	# cron_line=$(crontab -l 2>/dev/null | grep my_backup_launcher)
-	if [[ ! -f /root/backup/my_backup_v3.sh ]]; then
+	cron_line=$(crontab -l 2>/dev/null | grep my_backup_launcher)
+	if [[ -z $cron_line || ! -f /root/backup/my_backup_v3.sh ]]; then
 		echo "Backup Environment not configured. Try to configure"
 		createBackupEnv
 		delKeys
@@ -366,8 +366,8 @@ systemctl start wg-quick@${my_wg_int}
 sleep 2
 checkPrivNetAvailable
 if [[ $net_avail -eq 1 ]]; then
-	# cron_line=$(crontab -l 2>/dev/null | grep my_backup_launcher)
-	if [[ ! -f /root/backup/my_backup_v3.sh ]]; then
+	cron_line=$(crontab -l 2>/dev/null | grep my_backup_launcher)
+	if [[ -z $cron_line || ! -f /root/backup/my_backup_v3.sh ]]; then
 		echo "Backup Environment not configured. Try to configure"
 		createBackupEnv
 		delKeys
