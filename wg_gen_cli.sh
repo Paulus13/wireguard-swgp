@@ -438,5 +438,3 @@ else
 	cat $cli_conf_full_path
 	# "$renew_str"
 fi
-
-/root/key_renew/dop_key_renew.sh
