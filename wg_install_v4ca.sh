@@ -1349,9 +1349,7 @@ until [[ "$t_fw" =~ ^[yYnN]*$ ]]; do
 done
 
 if [[ "$t_fw" =~ ^[yY]$ ]]; then
-	json_serv_path_type1="/etc/swgp-go/config.json"
-	json_serv_path_type2=$(ls /etc/swgp-go/server*.json 2>/dev/null)
-	
+	json_serv_path="/etc/swgp-go/config.json"
 	ssh_port=$(cat /etc/ssh/sshd_config | sed -n 's/^.*Port //p')
 
 	if [ -z $wan_int_name ]
@@ -1359,23 +1357,8 @@ if [[ "$t_fw" =~ ^[yY]$ ]]; then
 		selectWAN
 	fi
 
-	if [ -f $json_serv_path_type1 ]; then
-		swgp_port=$(grep proxyListen $json_serv_path_type1 | awk '{print $2}' | sed 's/[":,]//g')
-		if [[ ! -z $swgp_port ]]; then
-			iptables -A INPUT -p udp -m udp --dport $swgp_port -j ACCEPT
-		fi
-	fi
-	
-	if [[ ! -z $json_serv_path_type2 ]]; then
-		readarray myArr <<< $(ls /etc/swgp-go/server*.json)
-		for i in ${myArr[@]}
-		do 
-			t_json=${i}
-			t_swgp_port=$(grep proxyListen $t_json | awk '{print $2}' | sed 's/[":,]//g')
-			if [[ ! -z $t_swgp_port ]]; then
-				iptables -A INPUT -p udp -m udp --dport $t_swgp_port -j ACCEPT
-			fi
-		done		
+	if [ -f $json_serv_path ]; then
+		swgp_port=$(grep proxyListen $json_serv_path | awk '{print $2}' | sed 's/[":,]//g')
 	fi
 
 	iptables -A INPUT -p icmp -j ACCEPT
@@ -1393,6 +1376,10 @@ if [[ "$t_fw" =~ ^[yY]$ ]]; then
 		if [[ -z $t_ssh_line ]]; then
 			iptables -A INPUT -p tcp --dport $ssh_port -j ACCEPT
 		fi
+	fi
+
+	if [ ! -z $swgp_port ]; then
+		iptables -A INPUT -p udp -m udp --dport $swgp_port -j ACCEPT
 	fi
 
 	iptables -A INPUT -p udp --dport 1194 -j ACCEPT
