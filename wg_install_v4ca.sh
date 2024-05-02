@@ -150,7 +150,7 @@ function manageMenuExp() {
 	# echo "WireGuard menu"
 	echo 
 	echo "What do you want to do?"
-	echo "   1) Install WG with obfuscate"	
+	echo "   1) Install WG (with obfuscate if posible)"	
 	echo "   2) Create WG config"
 	echo "   3) Create User config"
 	echo "   4) Show User config"
@@ -218,7 +218,7 @@ function manageMenuSimple() {
 	# echo "WireGuard menu"
 	echo 
 	echo "What do you want to do?"
-	echo "   1) Install WG with obfuscate"	
+	echo "   1) Install WG (with obfuscate if posible)"	
 	echo "   2) Create WG config"
 	echo "   3) Create User config"
 	echo "   4) Show User config"
@@ -308,22 +308,27 @@ if [[ $wg_int_list_num -eq 1 ]]; then
 	t_sel_wg=$(wg | grep interface | awk '{print $2}')
 else
 	createWGIntListForClients
-	
-	echo 
-	echo "This WG interfaces exist: $t_list"
-	read -p "What interface use? default - $def_int_cl: " t_wg_int
-	if [ -z $t_wg_int ]
-	then
-		 t_wg_int=$def_int_cl
-	fi
+	if [[ $int_for_cl_nul -eq 1 ]]; then
+		t_sel_wg=$def_int_cl
+		echo 
+		echo "This WG interface selected: $t_sel_wg"		
+	else
+		echo 
+		echo "This WG interfaces exist: $t_list"
+		read -p "What interface use? default - $def_int_cl: " t_wg_int
+		if [ -z $t_wg_int ]
+		then
+			 t_wg_int=$def_int_cl
+		fi
 
-	checkWGIntExist $t_wg_int
-	until [[ $wg_int_exist -eq 1 ]]; do
-		echo "$t_wg_int: invalid selection."
-		read -p "What interface use? " t_wg_int
 		checkWGIntExist $t_wg_int
-	done
-	t_sel_wg=$t_wg_int
+		until [[ $wg_int_exist -eq 1 ]]; do
+			echo "$t_wg_int: invalid selection."
+			read -p "What interface use? " t_wg_int
+			checkWGIntExist $t_wg_int
+		done
+		t_sel_wg=$t_wg_int
+	fi
 fi
 }
 
@@ -1622,7 +1627,7 @@ fi
 read -p "Install WG obfuscate? [Y/n]: " inst_soft
 if [ -z $inst_soft ]
 then
-	 inst_soft='Y'
+	inst_soft='Y'
 fi
 
 until [[ "$inst_soft" =~ ^[yYnN]*$ ]]; do
@@ -1856,6 +1861,7 @@ do
 		fi
 	fi
 done
+int_for_cl_nul=$j
 }
 
 function checkWGIntForClients {
