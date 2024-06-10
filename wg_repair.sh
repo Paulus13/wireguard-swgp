@@ -96,7 +96,7 @@ t_dkms_kern=$(dkms status 2>/dev/null | grep wireguard | grep $t_kern)
 t_obfus_service="/lib/systemd/system/wg-quick-local@.service"
 t_obfus_bin="/usr/local/bin/wg"
 
-if [[ ( ! -z $t_dkms && -z $t_dkms_kern ) || ( -f $t_obfus_service && -f $t_obfus_bin ) ]]; then
+if [[ ( ! -z $t_dkms && -z $t_dkms_kern ) || ( -f $t_obfus_service && -f $t_obfus_bin && -z $t_dkms_kern ) ]]; then
 	wg_obfus_inst=1
 	wg_obfus_load=0
 	
