@@ -90,10 +90,13 @@ if [[ ! -f /usr/sbin/dkms ]]; then
 	return
 fi
 t_kern=$(uname -a | awk '{print $3}')
-t_dkms=$(dkms status | grep wireguard)
-t_dkms_kern=$(dkms status | grep wireguard | grep $t_kern)
+t_dkms=$(dkms status 2>/dev/null | grep wireguard)
+t_dkms_kern=$(dkms status 2>/dev/null | grep wireguard | grep $t_kern)
 
-if [[ ! -z $t_dkms && -z $t_dkms_kern ]]; then
+t_obfus_service="/lib/systemd/system/wg-quick-local@.service"
+t_obfus_bin="/usr/local/bin/wg"
+
+if [[ ( ! -z $t_dkms && -z $t_dkms_kern ) || ( -f $t_obfus_service && -f $t_obfus_bin ) ]]; then
 	wg_obfus_inst=1
 	wg_obfus_load=0
 	
