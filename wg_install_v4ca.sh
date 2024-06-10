@@ -1696,10 +1696,18 @@ modprobe wireguard
 }
 
 function repairWGOBFUS {
+if [[ -z $1 ]]; then
+	force_mode=0
+else
+	force_mode=$1
+fi
+
 checkWGOBFUS
 
-if [[ $wg_obfus_inst -eq 1 ]]; then
-	return
+if [[ $force_mode -eq 0 ]]; then
+	if [[ $wg_obfus_inst -eq 1 ]]; then
+		return
+	fi
 fi
 
 if [[ $old_kern -eq 1 ]]; then
