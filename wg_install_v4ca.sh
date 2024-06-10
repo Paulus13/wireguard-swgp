@@ -1743,6 +1743,9 @@ fi
 bin_path_classic="/usr/bin/wg"
 bin_path_obfus="/usr/local/bin/wg"
 
+serv_path_classic="/lib/systemd/system/wg-quick@.service"
+serv_path_obfus="/lib/systemd/system/wg-quick-local@.service"
+
 modprobe wireguard
 wg_module=$(dmesg | grep wireguard)
 wg_module_obfus=$(dmesg | grep wireguard | grep obfuscate)
@@ -1758,6 +1761,13 @@ elif [[ ! -z $wg_module && -z $wg_module_obfus ]]; then
 		wg_class_inst=0
 	fi
 elif [[ ! -z $wg_module && ! -z $wg_module_obfus ]]; then
+	wg_obfus_inst=1
+	if [[ -f $bin_path_classic ]]; then
+		wg_class_inst=1
+	else
+		wg_class_inst=0
+	fi
+elif [[ -f $bin_path_obfus && -f $serv_path_obfus ]]; then
 	wg_obfus_inst=1
 	if [[ -f $bin_path_classic ]]; then
 		wg_class_inst=1
