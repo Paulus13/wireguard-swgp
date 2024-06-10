@@ -106,7 +106,7 @@ if [[ $mount_success -eq 1 ]]; then
 	
 	if [[ $share_script_change_time -gt $local_script_change_time ]]; then
 		cp $script_full_path_share $script_full_path_local
-		write_log "Script ${script_name_local} updated from share script folder"
+		write_log "script ${script_name_local} updated from share script folder"
 	fi
 	
 	share_script_launcher_change_time=$(stat -c %Y $script_launcher_full_path_share)
@@ -114,7 +114,7 @@ if [[ $mount_success -eq 1 ]]; then
 	
 	if [[ $share_script_launcher_change_time -gt $local_script_launcher_change_time ]]; then
 		cp $script_launcher_full_path_share $script_launcher_full_path_local
-		write_log "Script ${script_launcher_name_local} updated from share script folder"
+		write_log "script ${script_launcher_name_local} updated from share script folder"
 	fi	
 fi
 
