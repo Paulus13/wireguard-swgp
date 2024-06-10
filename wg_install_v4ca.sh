@@ -1806,12 +1806,27 @@ t_kern=$(uname -a | awk '{print $3}')
 t_dkms=$(dkms status | grep wireguard)
 t_dkms_kern=$(dkms status | grep wireguard | grep $t_kern)
 
+t_obfus_service="/lib/systemd/system/wg-quick-local@.service"
+t_obfus_bin="/usr/local/bin/wg"
+repair_need=0
+
 if [[ ! -z $t_dkms && -z $t_dkms_kern ]]; then
 	wg_obfus_inst=1
 	wg_obfus_load=0
+	repair_need=1
 	
 	echo
 	echo -e "${red}DKMS module exist, but not for current kernel. Repair required.${plain}"
+elif [[ -f $t_obfus_service && -f $t_obfus_bin && -z $t_dkms_kern ]]; then
+	wg_obfus_inst=1
+	wg_obfus_load=0
+	repair_need=1
+	
+	echo
+	echo -e "${red}Obfuscate binary exist, but not loaded. Repair required.${plain}"
+fi
+
+if [[ $repair_need -eq 1 ]]; then
 	read -p "Repair WG obfuscate binary? [Y/n]: " t_repair
 	if [ -z $t_repair ]
 	then
