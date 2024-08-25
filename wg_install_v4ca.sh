@@ -67,6 +67,14 @@ done
 ip=$ip_new	
 }
 
+function getWanIP {
+t_wan_ip=$(dig @resolver4.opendns.com myip.opendns.com +short -4)
+if [[ -z $t_wan_ip ]]; then
+	read wan_name < /etc/wireguard/wan_interface_name.var
+	t_wan_ip=$(ip a | grep $wan_name | grep inet | awk '{print $2}' | sed -r 's/\/.+//g')
+fi
+}
+
 # Проверка правильности IP-адреса:
 # Способ применения:
 #      validIP IP_АДРЕС
@@ -157,10 +165,11 @@ function manageMenuExp() {
 	echo "   5) Create crontab job for repair WG"
 	echo "   6) Firewall config"
 	echo "   7) Clone WG interface with users from existing WG interface (*expert function)"
-	echo "   8) Exit"
+	echo "   8) Create obfuscate configs (*expert function)"
+	echo "   9) Exit"
 	# until [[ -z $MENU_OPTION || $MENU_OPTION =~ ^[1-8]$ ]]; do
-	until [[ $MENU_OPTION =~ ^[1-8]$ ]]; do
-		read -rp "Select an option [1-8]: " MENU_OPTION
+	until [[ $MENU_OPTION =~ ^[1-9]$ ]]; do
+		read -rp "Select an option [1-9]: " MENU_OPTION
 	done
 
 	case $MENU_OPTION in
@@ -206,7 +215,12 @@ function manageMenuExp() {
 		MENU_OPTION=0
 		manageMenuExp			
 		;;
-	8|"")
+	8)
+		doCreateObfusConfigs
+		MENU_OPTION=0
+		manageMenuExp		
+		;;		
+	9|"")
 		exit 0
 		;;
 	esac
@@ -2129,6 +2143,87 @@ function cronMenu() {
 	esac
 }
 
+function createObfusConfig {
+if [[ -z $1 || -z $2 ]]; then
+	return 1
+else
+	clien_conf_folder=$1
+	t_conf_folder=$2
+fi
+
+t_obfus_line="ObfuscateKey = ${t_psk}"
+
+full_conf_folder=${clien_conf_folder}/${t_conf_folder}
+t_conf="${t_conf_folder}.conf"
+t_bfus_conf="${t_conf_folder}_obfus.conf"
+
+if [[ ! -f "${full_conf_folder}/${t_bfus_conf}" ]]; then
+	if [[ -f "${full_conf_folder}/${t_conf}" ]]; then
+		readarray lines < "${full_conf_folder}/${t_conf}"
+		for line in "${lines[@]}";
+		do
+			priv_key_in=$(echo $line | grep PrivateKey)
+			ep_in=$(echo $line | grep Endpoint)
+			
+			if [[ ! -z $priv_key_in ]]; then
+				echo $line >> "${full_conf_folder}/${t_bfus_conf}"
+				echo $t_obfus_line >> "${full_conf_folder}/${t_bfus_conf}"	
+			elif [[ ! -z $ep_in ]]; then
+				# t_ip=$(echo $line | awk '{print $3}' | awk -F: '{print $1}')
+				# new_ep_line="Endpoint = ${t_ip}:${list_port}"
+				new_ep_line=$obfus_ep_line
+				echo $new_ep_line >> "${full_conf_folder}/${t_bfus_conf}"
+			else
+				echo $line >> "${full_conf_folder}/${t_bfus_conf}"
+			fi
+		done
+		echo "${t_bfus_conf} created"
+	else
+		echo "Folder $t_conf_folder does not contain conf file"
+	fi
+else
+	echo "${t_bfus_conf} already exist"
+fi
+}
+
+function doCreateObfusConfigs {
+wg_conf_num=$(ls /etc/wireguard/wg*.conf 2>/dev/null | wc -l)
+if [[ $wg_conf_num -eq 0 ]]; then
+	echo
+	echo -e "${red}No WG interface exist."
+	echo -e "Create it before creating user config.${plain}"
+	return
+elif [[ $wg_conf_num -eq 1 ]]; then
+	wg_int_name=$(ls /etc/wireguard/wg*.conf | awk -F/ '{print $4}' | sed 's/.conf//g')
+else
+	selectWGIntForClients
+	wg_int_name=$t_sel_wg
+fi
+
+wg_int_num=$(echo $wg_int_name | sed 's/wg//g')
+
+if [[ $wg_int_num -eq 0 ]]; then
+	client_conf_path="/etc/wireguard/clients"
+	client_conf_path_short="clients"
+else
+	client_conf_path="/etc/wireguard/clients${wg_int_num}"
+	client_conf_path_short="clients${wg_int_num}"
+fi
+
+checkSWGP $wg_int_name
+if [[ $inst_swgp -eq 0 ]]; then
+	echo "SWGP not installed"
+	return 1
+fi
+
+getWanIP
+obfus_ep_line="Endpoint = ${t_wan_ip}:${list_port}"
+
+for i in `ls $client_conf_path`
+do
+	createObfusConfig $client_conf_path ${i}
+done
+}
 
 orig_path=$(pwd)
 initialCheck
