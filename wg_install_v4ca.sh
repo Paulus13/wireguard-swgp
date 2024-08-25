@@ -2217,8 +2217,8 @@ if [[ $inst_swgp -eq 0 ]]; then
 	return 1
 fi
 
-getWanIP
-obfus_ep_line="Endpoint = ${t_wan_ip}:${list_port}"
+# getWanIP
+# obfus_ep_line="Endpoint = ${t_wan_ip}:${list_port}"
 
 for i in `ls $client_conf_path`
 do
