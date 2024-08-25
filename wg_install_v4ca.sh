@@ -325,7 +325,8 @@ else
 	if [[ $int_for_cl_nul -eq 1 ]]; then
 		t_sel_wg=$def_int_cl
 		echo 
-		echo "This WG interface selected: $t_sel_wg"		
+		echo "This WG interface selected: $t_sel_wg"
+		echo
 	else
 		echo 
 		echo "This WG interfaces exist: $t_list"
@@ -2169,9 +2170,9 @@ if [[ ! -f "${full_conf_folder}/${t_bfus_conf}" ]]; then
 				echo $line >> "${full_conf_folder}/${t_bfus_conf}"
 				echo $t_obfus_line >> "${full_conf_folder}/${t_bfus_conf}"	
 			elif [[ ! -z $ep_in ]]; then
-				# t_ip=$(echo $line | awk '{print $3}' | awk -F: '{print $1}')
-				# new_ep_line="Endpoint = ${t_ip}:${list_port}"
-				new_ep_line=$obfus_ep_line
+				t_ip=$(echo $line | awk '{print $3}' | awk -F: '{print $1}')
+				new_ep_line="Endpoint = ${t_ip}:${list_port}"
+				# new_ep_line=$obfus_ep_line
 				echo $new_ep_line >> "${full_conf_folder}/${t_bfus_conf}"
 			else
 				echo $line >> "${full_conf_folder}/${t_bfus_conf}"
