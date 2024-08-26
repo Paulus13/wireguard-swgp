@@ -281,10 +281,10 @@ if [[ $wg_conf_num -eq 0 ]]; then
 fi
 
 wg_int_list_num=$(wg | grep interface | wc -l)
-wg_int_def=$(wg | grep interface | head -1 | awk '{print $2}')
+wg_int_def=$(wg | grep interface | sort | head -1 | awk '{print $2}')
 
 if [[ $wg_int_list_num -eq 1 ]]; then
-	t_sel_wg=$(wg | grep interface | awk '{print $2}')
+	t_sel_wg=$(wg | grep interface | sort | awk '{print $2}')
 else
 	createWGIntList
 	
@@ -316,10 +316,10 @@ if [[ $wg_conf_num -eq 0 ]]; then
 fi
 
 wg_int_list_num=$(wg | grep interface | wc -l)
-wg_int_def=$(wg | grep interface | head -1 | awk '{print $2}')
+wg_int_def=$(wg | grep interface | sort | head -1 | awk '{print $2}')
 
 if [[ $wg_int_list_num -eq 1 ]]; then
-	t_sel_wg=$(wg | grep interface | awk '{print $2}')
+	t_sel_wg=$(wg | grep interface | sort | awk '{print $2}')
 else
 	createWGIntListForClients
 	if [[ $int_for_cl_nul -eq 1 ]]; then
@@ -1884,7 +1884,7 @@ kern2=$(uname -a | awk '{print $3}' | awk -F- '{print $1}' | awk -F. '{print $2}
 
 function createWGIntList {
 t_list=""
-readarray myArr <<< $(wg | grep interface | awk '{print $2}')
+readarray myArr <<< $(wg | grep interface | sort | awk '{print $2}')
 for i in ${myArr[@]}
 do 
 	t_int=${i}
@@ -1896,7 +1896,7 @@ function createWGIntListForClients {
 t_list=""
 j=0
 
-readarray myArr <<< $(wg | grep interface | awk '{print $2}')
+readarray myArr <<< $(wg | grep interface | sort | awk '{print $2}')
 for i in ${myArr[@]}
 do 
 	t_int=${i}
@@ -1936,7 +1936,7 @@ else
 	echo -e "${green}This WG Interfaces configured:${plain}"
 fi
 
-readarray myArr <<< $(wg | grep interface | awk '{print $2}')
+readarray myArr <<< $(wg | grep interface | awk '{print $2}' | sort)
 for i in ${myArr[@]}
 do
 	t_int=${i}
