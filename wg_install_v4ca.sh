@@ -706,7 +706,11 @@ if [[ ! -z $max_wg_int ]]; then
 		t_int_ip3=$(echo $t_int_ip | awk -F. '{print $3}')
 		t_int_ip4=1
 		
-		t_int_ip2=$(( t_int_ip2+1 ))
+		if [[ $t_int_ip1 -lt 100 ]]; then
+			t_int_ip2=$(( t_int_ip2+1 ))
+		else
+			t_int_ip3=$(( t_int_ip3+1 ))
+		fi
 		
 		in_ip="${t_int_ip1}.${t_int_ip2}.${t_int_ip3}.${t_int_ip4}"
 		t_ip_used_line=$(ip a | grep -w $in_ip)
