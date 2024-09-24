@@ -15,7 +15,7 @@ script_launcher_name_local="awg_repair_launcher.sh"
 script_launcher_full_path_local="${script_path_local}/${script_launcher_name_local}"
 
 log_path="/root/awg_repair"
-log_file="${log_path}/wg_repair.log"
+log_file="${log_path}/awg_repair.log"
 
 function checkPrivNetAvailable {
 p_loss=$(ping -qw 3 192.168.10.10 2>/dev/null | grep 'packet loss' | cut -d ' ' -f 6 | sed 's/%//')
