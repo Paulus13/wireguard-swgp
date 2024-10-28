@@ -32,23 +32,43 @@ if [[ "$os_version" -le 2004 ]]; then
 elif [[ "$os_version" -le 2204 ]]; then
 	old_kern=0
 	kern_type=2
-elif [[ "$os_version" -le 2404 ]]; then
+# elif [[ "$os_version" -le 2404 ]]; then
+else
 	old_kern=0
 	kern_type=3
 fi
 }
 
 function repairAWG {
-if [[ $kern_type -eq 1 ]]; then
-	dkms build -m amneziawg -v 1.0.20240922
-	dkms install -m amneziawg -v 1.0.20240922
-elif [[ $kern_type -eq 2 ]]; then
-	dkms build -m amneziawg -v 1.0.20240923
-	dkms install -m amneziawg -v 1.0.20240923
-elif [[ $kern_type -eq 3 ]]; then
-	dkms build -m amneziawg -v 1.0.20240924
-	dkms install -m amneziawg -v 1.0.20240924
+if [[ -z $1 ]]; then
+	case $kern_type in
+	1)
+		t_mod_ver="1.0.20240922"
+		;;
+	2)
+		t_mod_ver="1.0.20240923"
+		;;
+	3)
+		t_mod_ver="1.0.20240924"
+		;;
+	esac
+else
+	t_mod_ver=$1
 fi
+
+# if [[ $kern_type -eq 1 ]]; then
+	# dkms build -m amneziawg -v 1.0.20240922
+	# dkms install -m amneziawg -v 1.0.20240922
+# elif [[ $kern_type -eq 2 ]]; then
+	# dkms build -m amneziawg -v 1.0.20240923
+	# dkms install -m amneziawg -v 1.0.20240923
+# elif [[ $kern_type -eq 3 ]]; then
+	# dkms build -m amneziawg -v 1.0.20240924
+	# dkms install -m amneziawg -v 1.0.20240924
+# fi
+
+dkms build -m amneziawg -v $t_mod_ver
+dkms install -m amneziawg -v $t_mod_ver
 
 rmmod amneziawg
 modprobe amneziawg
@@ -63,44 +83,6 @@ if [ ! -z $awg_quick_line ]; then
 	done
 fi
 cd $t_pwd
-}
-
-function checkWGOBFUS {
-bin_path_classic="/usr/bin/wg"
-bin_path_obfus="/usr/local/bin/wg"
-
-serv_path_classic="/lib/systemd/system/wg-quick@.service"
-serv_path_obfus="/lib/systemd/system/wg-quick-local@.service"
-
-modprobe wireguard
-wg_module=$(dmesg | grep wireguard)
-wg_module_obfus=$(dmesg | grep wireguard | grep obfuscate)
-
-if [[ -z $wg_module ]]; then
-	wg_obfus_inst=0
-	wg_class_inst=0
-elif [[ ! -z $wg_module && -z $wg_module_obfus ]]; then
-	wg_obfus_inst=0
-	if [[ -f $bin_path_classic ]]; then
-		wg_class_inst=1
-	else
-		wg_class_inst=0
-	fi
-elif [[ ! -z $wg_module && ! -z $wg_module_obfus ]]; then
-	wg_obfus_inst=1
-	if [[ -f $bin_path_classic ]]; then
-		wg_class_inst=1
-	else
-		wg_class_inst=0
-	fi
-elif [[ -f $bin_path_obfus && -f $serv_path_obfus ]]; then
-	wg_obfus_inst=1
-	if [[ -f $bin_path_classic ]]; then
-		wg_class_inst=1
-	else
-		wg_class_inst=0
-	fi
-fi
 }
 
 function checkAWG {
@@ -134,8 +116,9 @@ if [[ ! -f /usr/sbin/dkms ]]; then
 	return
 fi
 t_kern=$(uname -a | awk '{print $3}')
-t_dkms=$(dkms status | grep amneziawg)
-t_dkms_kern=$(dkms status | grep amneziawg | grep $t_kern)
+t_dkms=$(dkms status 2>/dev/null | grep amneziawg)
+t_dkms_ver=$(dkms status 2>/dev/null | grep amneziawg | tail -n1 | awk '{print $1}' | awk -F/ '{print $2}' | sed 's/,$//')
+t_dkms_kern=$(dkms status 2>/dev/null | grep amneziawg | grep $t_kern)
 
 t_awg_service="/lib/systemd/system/awg-quick@.service"
 t_awg_bin="/usr/bin/awg"
@@ -158,7 +141,7 @@ elif [[ -f $t_awg_service && -f $t_awg_bin && -z $t_dkms_kern ]]; then
 fi
 
 if [[ $repair_need -eq 1 ]]; then
-	repairAWG
+	repairAWG $t_dkms_ver
 	
 	t_dkms=$(dkms status | grep amneziawg)
 	t_dkms_kern=$(dkms status | grep amneziawg | grep $t_kern)
