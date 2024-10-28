@@ -78,8 +78,8 @@ awg_quick_line=$(ls /lib/systemd/system/awg-quick*)
 cd /etc/systemd/system/multi-user.target.wants
 
 if [ ! -z $awg_quick_line ]; then
-	ls awg-quick* | awk -F@ '{print $2}' | while read t_wg_int; do
-		systemctl restart wg-quick-local@${t_wg_int}
+	ls awg-quick* | awk -F@ '{print $2}' | while read t_awg_int; do
+		systemctl restart awg-quick@${t_awg_int}
 	done
 fi
 cd $t_pwd
